@@ -133,7 +133,7 @@ def show_statistics(message: Message):
         bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
 
-@bot.message_handler(content_types=['text', 'photo'])
+@bot.message_handler(content_types=['text', 'voice', 'photo', 'video', 'video_note', 'sticker', 'animation'])
 def send_message_partner(message: Message):
     try:
         user_id = message.from_user.id
@@ -151,8 +151,18 @@ def send_message_partner(message: Message):
         if partner_id is not None:
             if message.text:
                 bot.send_message(partner_id, message.text)
+            elif message.voice:
+                bot.send_voice(partner_id, message.voice.file_id)
             elif message.photo:
                 bot.send_photo(partner_id, message.photo[-1].file_id, caption=message.caption)
+            elif message.video:
+                bot.send_video(partner_id, message.video.file_id, caption=message.caption)
+            elif message.video_note:
+                bot.send_video_note(partner_id, message.video_note.file_id)
+            elif message.sticker:
+                bot.send_sticker(partner_id, message.sticker.file_id)
+            elif message.animation:
+                bot.send_animation(partner_id, message.animation.file_id)
         else:
             bot.send_message(user_id, "❌ У вас нет собеседника.")
     except KeyError:
