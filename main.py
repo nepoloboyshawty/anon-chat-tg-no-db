@@ -1,6 +1,6 @@
 import telebot
 
-from common import bot, users, update_user
+from common import bot, users, settings_messages, update_user
 
 from telebot.types import Message, CallbackQuery
 from telebot import types
@@ -41,10 +41,11 @@ def send_welcome(message: Message):
         return
 
     users[user_id] = {"user_gender": None, "user_age": None, "like": 0, "dislike": 0,
-                      "partner_gender": None, "partner_age": None, "partner_id": None, "last_partner_id": None, "is_looking": False}
-
+                      "partner_gender": None, "partner_age": None, "partner_id": None, "last_partner_id": None, 
+                      "is_looking": False}
+    
     bot.send_message(message.chat.id, f"Приветствуем Вас в анонимном чат-боте TwoChat! 👋🏻 \
-                                        \n\nДля начала Вам стоит выбрать Ваш пол:", reply_markup=gender_selection)
+                                            \n\nДля начала Вам стоит выбрать Ваш пол:", reply_markup=gender_selection)
 
 
 @bot.message_handler(commands=['stop'])
@@ -132,30 +133,42 @@ def show_statistics(message: Message):
         bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
 
-@bot.message_handler()
-def button_handler(message: Message):
-    if message.text == "Сменить свой пол":
-        bot.send_message(message.chat.id, "Выберите Ваш новый пол:", reply_markup=s_user_gender_selection)
-    if message.text == "Сменить свой возраст":
-        bot.send_message(message.chat.id, "Выберите Ваш новый возраст:", reply_markup=s_user_age_selection)
-    if message.text == "Сменить пол собеседника":
-        bot.send_message(message.chat.id, "Выберите новый пол собеседника:", reply_markup=s_partner_gender_selection)
-    if message.text == "Сменить возраст собеседника":
-        bot.send_message(message.chat.id, "Выберите новый возраст собеседника:", reply_markup=s_partner_age_selection)
-
-
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(content_types=['text', 'photo'])
 def send_message_partner(message: Message):
     try:
         user_id = message.from_user.id
         partner_id = users[user_id]['partner_id']
 
+        if (message.text == settings_messages[0] or message.text == settings_messages[1] 
+                or message.text == settings_messages[2] or message.text == settings_messages[3]):
+            if partner_id is not None:
+                bot.send_message(user_id, "❌ Вы не можете воспользоваться командой во время общения.")
+                return
+
+            button_handler(message)
+            return
+
         if partner_id is not None:
-            bot.send_message(partner_id, message.text)
+            if message.text:
+                bot.send_message(partner_id, message.text)
+            elif message.photo:
+                bot.send_photo(partner_id, message.photo[-1].file_id, caption=message.caption)
         else:
             bot.send_message(user_id, "❌ У вас нет собеседника.")
     except KeyError:
         bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
+
+
+@bot.message_handler(content_types=['text'])
+def button_handler(message: Message):
+    if message.text == settings_messages[0]:
+        bot.send_message(message.chat.id, "Выберите Ваш новый пол:", reply_markup=s_user_gender_selection)
+    elif message.text == settings_messages[1]:
+        bot.send_message(message.chat.id, "Выберите Ваш новый возраст:", reply_markup=s_user_age_selection)
+    elif message.text == settings_messages[2]:
+        bot.send_message(message.chat.id, "Выберите новый пол собеседника:", reply_markup=s_partner_gender_selection)
+    elif message.text == settings_messages[3]:
+        bot.send_message(message.chat.id, "Выберите новый возраст собеседника:", reply_markup=s_partner_age_selection)
 
 
 bot.callback_query_handler()(inline_buttons_handler)
