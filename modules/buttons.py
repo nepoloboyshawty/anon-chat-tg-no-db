@@ -1,6 +1,6 @@
 from telebot import types
 
-from common import sexes, ages, settings_messages
+from .common import sexes, ages, settings_messages
 
 # Выбор своего пола
 gender_selection = types.InlineKeyboardMarkup()

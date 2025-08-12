@@ -5,7 +5,7 @@ from telebot import types
 
 from modules.common import bot, users, settings_messages, update_user
 from modules.handlers import inline_buttons_handler
-from modules.handlers import (gender_selection, s_user_gender_selection, s_user_age_selection, s_partner_gender_selection, 
+from modules.buttons import (gender_selection, s_user_gender_selection, s_user_age_selection, s_partner_gender_selection, 
                      s_partner_age_selection, buttons_editing)
 
 def is_registered(user_id):

@@ -1,8 +1,8 @@
 from telebot.types import CallbackQuery
 from telebot import types
 
-from common import users, sexes, ages, update_user, bot, search_partner
-from buttons import user_age_selection, partner_age_selection, partner_gender_selection
+from .common import users, sexes, ages, update_user, bot, search_partner
+from .buttons import user_age_selection, partner_age_selection, partner_gender_selection
 
 @bot.callback_query_handler()
 def inline_buttons_handler(call: CallbackQuery):
