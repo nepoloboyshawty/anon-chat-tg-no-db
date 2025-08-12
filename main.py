@@ -43,7 +43,7 @@ def send_welcome(message: Message):
     update_user(user_id, user_gender=None, user_age=None, like=0, dislike=0, partner_gender=None, partner_age=None, 
                 partner_id=None, last_partner_id=None, is_looking=False)
     
-    bot.send_message(message.chat.id, f"Приветствуем Вас в анонимном чат-боте TwoChat! 👋🏻\n\n"
+    bot.send_message(message.chat.id, f"Приветствуем Вас в анонимном чат-боте! 👋🏻\n\n"
                                        "Для начала Вам стоит выбрать Ваш пол:", reply_markup=gender_selection)
 
 
