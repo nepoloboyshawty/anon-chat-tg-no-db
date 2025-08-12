@@ -17,7 +17,6 @@ def inline_buttons_handler(call: CallbackQuery):
     last_partner_id = users[user_id]['last_partner_id']
 
     # Предлагается выбрать свой возраст
-
     if call.data == "male_gender":
         update_user(user_id, user_gender=sexes[0], user_age=None, like=user_like, dislike=user_dislike, partner_gender=None, partner_age=None, 
                     partner_id=None, last_partner_id=last_partner_id, is_looking=False)
@@ -33,7 +32,6 @@ def inline_buttons_handler(call: CallbackQuery):
                               text="✅ Вы выбрали свой женский пол.\n\nТеперь выберите свой возраст:", reply_markup=user_age_selection)        
 
     # Предлагается выбрать пол собеседника
-
     elif call.data == "user_age_17":        
         update_user(user_id, user_gender=user_gender, user_age=ages[0], like=user_like, dislike=user_dislike, partner_gender=None, partner_age=None, 
                     partner_id=None, last_partner_id=last_partner_id, is_looking=False)
@@ -70,7 +68,6 @@ def inline_buttons_handler(call: CallbackQuery):
                               text="✅ Вы выбрали свой возраст от 35 лет.\n\nТеперь выберите пол собеседника:", reply_markup=partner_gender_selection)
 
     # Предлагается выбрать возраст собеседника
-    
     elif call.data == "partner_male_gender":        
         update_user(user_id, user_gender=user_gender, user_age=user_age, like=user_like, dislike=user_dislike, partner_gender=sexes[0], partner_age=None, 
                     partner_id=None, last_partner_id=last_partner_id, is_looking=False)
@@ -93,7 +90,6 @@ def inline_buttons_handler(call: CallbackQuery):
                               text="✅ Вы выбрали любой пол собеседника.\n\nТеперь выберите возраст собеседника:", reply_markup=partner_age_selection)
 
     # Выбран пол собеседника, далее - его поиск вызовом функции search_partner()
-
     elif call.data == "partner_age_17":
         update_user(user_id, user_gender=user_gender, user_age=user_age, like=user_like, dislike=user_dislike, 
                     partner_gender=partner_gender, partner_age=ages[0], partner_id=None, last_partner_id=last_partner_id, is_looking=True)
@@ -143,7 +139,6 @@ def inline_buttons_handler(call: CallbackQuery):
         search_partner(call)
 
     # Обработчик мнения пользователей о себе
-
     elif call.data == "like":
         users[last_partner_id]['like'] += 1
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
@@ -155,7 +150,6 @@ def inline_buttons_handler(call: CallbackQuery):
                               text="Очень жаль, что Ваш прошлый собеседник Вам не понравился. 😞", reply_markup=None)
         
     # Обработчик выбора своего пола через настройки
-        
     elif call.data == "s_male_gender":
         update_user(user_id, user_gender=sexes[0], user_age=user_age, like=user_like, dislike=user_dislike, 
                     partner_gender=partner_gender, partner_age=partner_age, partner_id=None, last_partner_id=last_partner_id, is_looking=False)
@@ -171,7 +165,6 @@ def inline_buttons_handler(call: CallbackQuery):
                               text="✅ Вы изменили свой пол на женский.", reply_markup=None)
         
     # Обработчик выбора своего возраста через настройки
-
     elif call.data == "s_user_age_17":
         update_user(user_id, user_gender=user_gender, user_age=ages[0], like=user_like, dislike=user_dislike, 
                     partner_gender=partner_gender, partner_age=partner_age, partner_id=None, last_partner_id=last_partner_id, is_looking=False)
@@ -208,7 +201,6 @@ def inline_buttons_handler(call: CallbackQuery):
                               text="✅ Вы изменили свой возраст от 35 лет.", reply_markup=None)
 
     # Обработчик выбора пола собеседника через настройки
-
     elif call.data == "s_partner_male_gender":
         update_user(user_id, user_gender=user_gender, user_age=user_age, like=user_like, dislike=user_dislike, 
                     partner_gender=sexes[0], partner_age=partner_age, partner_id=None, last_partner_id=last_partner_id, is_looking=False)
@@ -230,7 +222,6 @@ def inline_buttons_handler(call: CallbackQuery):
                               text="✅ Вы изменили пол собеседника на любой.", reply_markup=None)
 
     # Обработчик выбора возраста собеседника через настройки
-
     elif call.data == "s_partner_age_17":
         update_user(user_id, user_gender=user_gender, user_age=user_age, like=user_like, dislike=user_dislike, 
                     partner_gender=partner_gender, partner_age=ages[0], partner_id=None, last_partner_id=last_partner_id, is_looking=False)
@@ -265,10 +256,3 @@ def inline_buttons_handler(call: CallbackQuery):
         
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
                               text="✅ Вы изменили возраст собеседника от 35 лет.", reply_markup=None)
-        
-    elif call.data == "s_partner_age_any":
-        update_user(user_id, user_gender=user_gender, user_age=user_age, like=user_like, dislike=user_dislike, 
-                    partner_gender=partner_gender, partner_age=ages[5], partner_id=None, last_partner_id=last_partner_id, is_looking=False)
-        
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                              text="✅ Вы изменили возраст собеседника на любой.", reply_markup=None)
