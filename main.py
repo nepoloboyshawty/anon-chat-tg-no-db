@@ -1,10 +1,9 @@
 import telebot
 
-from common import bot, users, settings_messages, update_user
-
 from telebot.types import Message, CallbackQuery
 from telebot import types
 
+from common import bot, users, settings_messages, update_user
 from handlers import inline_buttons_handler
 from buttons import (gender_selection, s_user_gender_selection, s_user_age_selection, s_partner_gender_selection, 
                      s_partner_age_selection, buttons_editing)
@@ -24,8 +23,8 @@ def is_registered(user_id):
         user_partner_gender = user_params['partner_gender']
         user_partner_age = user_params['partner_age']
 
-        if user == user_id and user_gender is not None and user_age is not None and user_partner_gender is not None \
-           and user_partner_age is not None:        
+        if (user == user_id and user_gender is not None and user_age is not None 
+                and user_partner_gender is not None and user_partner_age is not None):
             return True
         
     return False
@@ -35,17 +34,17 @@ def is_registered(user_id):
 def send_welcome(message: Message):
     user_id = message.from_user.id
 
-    if is_registered(user_id):        
-        bot.send_message(message.chat.id, f"Рады снова Вас видеть! 👋🏻\n\nЧтобы начать поиск, измените параметры, \
-                                            введя команду /restart или введите команду /next, чтобы продолжить поиск без изменений.")
+    if is_registered(user_id):
+        bot.send_message(message.chat.id, "Рады снова Вас видеть! 👋🏻\n\nЧтобы начать поиск, измените параметры, "
+                                           "введя команду /settings или введите команду /next, чтобы продолжить поиск без изменений. "
+                                           "Просмотреть информацию о себе можно с помощью команды /stats.")
         return
-
-    users[user_id] = {"user_gender": None, "user_age": None, "like": 0, "dislike": 0,
-                      "partner_gender": None, "partner_age": None, "partner_id": None, "last_partner_id": None, 
-                      "is_looking": False}
     
-    bot.send_message(message.chat.id, f"Приветствуем Вас в анонимном чат-боте TwoChat! 👋🏻 \
-                                            \n\nДля начала Вам стоит выбрать Ваш пол:", reply_markup=gender_selection)
+    update_user(user_id, user_gender=None, user_age=None, like=0, dislike=0, partner_gender=None, partner_age=None, 
+                partner_id=None, last_partner_id=None, is_looking=False)
+    
+    bot.send_message(message.chat.id, f"Приветствуем Вас в анонимном чат-боте TwoChat! 👋🏻\n\n"
+                                       "Для начала Вам стоит выбрать Ваш пол:", reply_markup=gender_selection)
 
 
 @bot.message_handler(commands=['stop'])
@@ -63,8 +62,8 @@ def end_conversation(message: Message):
     
         if users[user_id]['is_looking'] == True:
 
-            bot.send_message(user_id, "✅ Вы завершили поиск собеседника. Чтобы продолжить поиск, введите команду /next, \
-                                    а для редактирования настроек - /settings.")
+            bot.send_message(user_id, "✅ Вы завершили поиск собеседника. Чтобы продолжить поиск, введите команду /next, "
+                                      "а для редактирования настроек - /settings.")
 
             update_user(user_id, user_gender=user_gender, user_age=user_age, like=user_like, dislike=user_dislike, 
                         partner_gender=user_partner_gender, partner_age=user_partner_age, partner_id=None, last_partner_id=None, is_looking=False)
@@ -101,7 +100,6 @@ def end_conversation(message: Message):
             update_user(partner_id, user_gender=partner_gender, user_age=partner_age, like=partner_like, dislike=partner_dislike, 
                         partner_gender=partner_partner_gender, partner_age=partner_partner_age, partner_id=None, 
                         last_partner_id=user_id, is_looking=False)
-        
         else:
             bot.send_message(user_id, "❌ У вас нет собеседника.")
     except KeyError:
@@ -110,6 +108,7 @@ def end_conversation(message: Message):
 
 @bot.message_handler(commands=['settings'])
 def edit_settings(message: Message):
+
     if is_registered(message.from_user.id) == False:
         return bot.send_message(message.from_user.id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
@@ -120,6 +119,9 @@ def edit_settings(message: Message):
 def show_statistics(message: Message):
     try:
         user_id = message.from_user.id
+        user_name = message.from_user.full_name
+
+        partner_id = users[user_id]['partner_id']
 
         user_gender = users[user_id]['user_gender']
         user_age = users[user_id]['user_age']
@@ -128,7 +130,13 @@ def show_statistics(message: Message):
         user_partner_gender = users[user_id]['partner_gender']
         user_partner_age = users[user_id]['partner_age']
 
-        bot.send_message(user_id, f"Твой пол: {user_gender}\nТвой возраст: {user_age}\nКол-во лайков: {user_like}\nКол-во дизлайков: {user_dislike}\nПол партнера: {user_partner_gender}\nВозраст партнера: {user_partner_age}")
+        has_partner = "Да" if partner_id is not None else "Нет"
+
+        bot.send_message(user_id, f"<b>{user_name}</b>, ниже представлена информация о Вас.\n\n"
+                                   f"<i>Ваш пол: {user_gender}.\nВаш возраст: {user_age}.\nКоличество лайков: {user_like}.\n"
+                                   f"Количество дизлайков: {user_dislike}.\nЖелаемый пол партнера: {user_partner_gender}.\n"
+                                   f"Желаемый возраст партнера: {user_partner_age}.\n"
+                                   f"Имеется ли собеседник на данный момент: {has_partner}.</i>", parse_mode="html")
     except KeyError:
         bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
@@ -139,13 +147,15 @@ def send_message_partner(message: Message):
         user_id = message.from_user.id
         partner_id = users[user_id]['partner_id']
 
-        if (message.text == settings_messages[0] or message.text == settings_messages[1] 
-                or message.text == settings_messages[2] or message.text == settings_messages[3]):
-            if partner_id is not None:
-                bot.send_message(user_id, "❌ Вы не можете воспользоваться командой во время общения.")
+        if (message.text == settings_messages[0] 
+                or message.text == settings_messages[1] or message.text == settings_messages[2] 
+                or message.text == settings_messages[3] or message.text == settings_messages[4]):
+            if partner_id is not None or users[user_id]['is_looking']:
+                bot.send_message(user_id, "❌ Вы не можете воспользоваться командой во время поиска или общения.")
                 return
 
-            button_handler(message)
+            bot.message_handler()
+            (button_handler(message))
             return
 
         if partner_id is not None:
@@ -179,8 +189,12 @@ def button_handler(message: Message):
         bot.send_message(message.chat.id, "Выберите новый пол собеседника:", reply_markup=s_partner_gender_selection)
     elif message.text == settings_messages[3]:
         bot.send_message(message.chat.id, "Выберите новый возраст собеседника:", reply_markup=s_partner_age_selection)
+    elif message.text == settings_messages[4]:
+        bot.message_handler()
+        (show_statistics(message))
 
 
-bot.callback_query_handler()(inline_buttons_handler)
+bot.callback_query_handler()
+(inline_buttons_handler)
 
 bot.infinity_polling()
