@@ -15,19 +15,32 @@ settings_messages = [
     "Сменить свой пол", 
     "Сменить свой возраст", 
     "Сменить пол собеседника", 
-    "Сменить возраст собеседника"
+    "Сменить возраст собеседника",
     "Просмотреть свою статистику"
 ]
 
 def update_user(user_id, **kwargs):
     """
     Функция обновляет данные пользователя.
+    Если пользователь не найден, создается
+    новый ключ с пустым словарем в основном
+    словаре.
 
     :param user_id: уникальный идентификатор 
     пользователя.
     :param **kwargs: произвольное количество 
     параметров пользователя.
     """
+    is_found = False
+
+    for user in users:
+        if user == user_id:
+            is_found = True
+            break
+        
+    if is_found == False:
+        users[user_id] = {}
+
     users[user_id].update({key: value for key, value in kwargs.items()})
 
 
@@ -43,7 +56,8 @@ def search_partner(message: Message):
         user_partner_gender = users[user_id]['partner_gender']
         user_partner_age = users[user_id]['partner_age']
 
-        if user_gender is not None and user_age is not None and user_partner_gender is not None and user_partner_age is not None:
+        if (user_gender is not None and user_age is not None 
+                and user_partner_gender is not None and user_partner_age is not None):
 
             partner_id = None
 
@@ -76,14 +90,14 @@ def search_partner(message: Message):
             partner_dislike = users[partner_id]['dislike']
             partner_partner_gender = users[partner_id]['partner_gender']
             partner_partner_age = users[partner_id]['partner_age']
-                    
-            users[user_id] = {"user_gender": user_gender, "user_age": user_age, "like": user_like, "dislike": user_dislike,
-                              "partner_gender": user_partner_gender, "partner_age": user_partner_age, "partner_id": partner_id, 
-                              "last_partner_id": None, "is_looking": False}
             
-            users[partner_id] = {"user_gender": partner_gender, "user_age": partner_age, "like": partner_like, "dislike": partner_dislike,
-                                 "partner_gender": partner_partner_gender, "partner_age": partner_partner_age, "partner_id": user_id, 
-                                 "last_partner_id": None, "is_looking": False}
+            update_user(user_id, user_gender=user_gender, user_age=user_age, like=user_like, dislike=user_dislike,
+                        partner_gender=user_partner_gender, partner_age=user_partner_age, partner_id=partner_id,
+                        last_partner_id=None, is_looking=False)
+            
+            update_user(partner_id, user_gender=partner_gender, user_age=partner_age, like=partner_like, dislike=partner_dislike,
+                        partner_gender=partner_partner_gender, partner_age=partner_partner_age, partner_id=user_id,
+                        last_partner_id=None, is_looking=False)
 
             bot.send_message(user_id, "Вы нашли собеседника, общайтесь!")
             bot.send_message(partner_id, "Вы нашли собеседника, общайтесь!")
