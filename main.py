@@ -1,6 +1,4 @@
-import telebot
-
-from telebot.types import Message, CallbackQuery
+from telebot.types import Message
 from telebot import types
 
 from modules.common import bot, users, settings_messages, update_user
@@ -49,6 +47,8 @@ def send_welcome(message: Message):
 
 @bot.message_handler(commands=['stop'])
 def end_conversation(message: Message):
+    user_id = None
+
     try:
         user_id = message.from_user.id
         partner_id = users[user_id]['partner_id']
@@ -60,7 +60,7 @@ def end_conversation(message: Message):
         user_partner_gender = users[user_id]['partner_gender']
         user_partner_age = users[user_id]['partner_age']
     
-        if users[user_id]['is_looking'] == True:
+        if users[user_id]['is_looking']:
 
             bot.send_message(user_id, "✅ Вы завершили поиск собеседника. Чтобы продолжить поиск, введите команду /next, "
                                       "а для редактирования настроек - /settings.")
@@ -103,20 +103,23 @@ def end_conversation(message: Message):
         else:
             bot.send_message(user_id, "❌ У вас нет собеседника.")
     except KeyError:
-        bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
+        if user_id is not None:
+            bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
 
 @bot.message_handler(commands=['settings'])
 def edit_settings(message: Message):
 
-    if is_registered(message.from_user.id) == False:
-        return bot.send_message(message.from_user.id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
+    if is_registered(message.from_user.id):
+        return bot.send_message(message.chat.id, "Вы открыли настройки.", reply_markup=buttons_editing)
 
-    bot.send_message(message.chat.id, "Вы открыли настройки.", reply_markup=buttons_editing)
+    return bot.send_message(message.from_user.id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
 
 @bot.message_handler(commands=['stats'])
 def show_statistics(message: Message):
+    user_id = None
+
     try:
         user_id = message.from_user.id
         user_name = message.from_user.full_name
@@ -138,11 +141,14 @@ def show_statistics(message: Message):
                                    f"Желаемый возраст партнера: {user_partner_age}.\n"
                                    f"Имеется ли собеседник на данный момент: {has_partner}.</i>", parse_mode="html")
     except KeyError:
-        bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
+        if user_id is not None:
+            bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
 
 @bot.message_handler(content_types=['text', 'voice', 'photo', 'video', 'video_note', 'sticker', 'animation'])
 def send_message_partner(message: Message):
+    user_id = None
+
     try:
         user_id = message.from_user.id
         partner_id = users[user_id]['partner_id']
@@ -176,7 +182,8 @@ def send_message_partner(message: Message):
         else:
             bot.send_message(user_id, "❌ У вас нет собеседника.")
     except KeyError:
-        bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
+        if user_id is not None:
+            bot.send_message(user_id, "⚠️ В вашем случае Вам нужно воспользоваться командой /start.")
 
 
 @bot.message_handler(content_types=['text'])
@@ -194,7 +201,7 @@ def button_handler(message: Message):
         (show_statistics(message))
 
 
-bot.callback_query_handler()
-(inline_buttons_handler)
+(bot.callback_query_handler()
+(inline_buttons_handler))
 
 bot.infinity_polling()
